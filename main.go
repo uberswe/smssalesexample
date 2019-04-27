@@ -31,6 +31,7 @@ func main() {
 	// I recommend running this program behind something like Caddy (https://caddyserver.com/) that provides SSL and can proxy to the localhost
 	http.HandleFunc("/outgoing", handleOutgoingSMS) // setting router rule
 	http.HandleFunc("/incoming", handleIncomingSMS)
+	fmt.Println("Listening on port :8080")
 	err := http.ListenAndServe(":8080", nil) // setting listening port
 	if err != nil {
 		panic(err)

@@ -15,8 +15,10 @@ var username = ""
 var password = ""
 
 func main() {
+	// We take all arguments after our program name
 	args := os.Args[1:]
 
+	// Error if not enough arguments
 	if len(args) != 3 {
 		panic("must supply 46elks username and password and from number")
 	}
@@ -25,6 +27,8 @@ func main() {
 	password = args[1]
 	numberFrom = args[2]
 
+	// This sets up two endpoints http://localhost:8080/outgoing and http://localhost:8080/incoming
+	// I recommend running this program behind something like Caddy (https://caddyserver.com/) that provides SSL and can proxy to the localhost
 	http.HandleFunc("/outgoing", handleOutgoingSMS) // setting router rule
 	http.HandleFunc("/incoming", handleIncomingSMS)
 	err := http.ListenAndServe(":8080", nil) // setting listening port

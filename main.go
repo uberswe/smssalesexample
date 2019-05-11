@@ -100,12 +100,12 @@ func handleIncomingSMS(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				// I would say an 8 or higher is positive, 7 or lower would indicate something is wrong (just my assumption)
 				if value >= 8 {
-					sendSMS(to, messagepositive)
+					sendSMS(from, messagepositive)
 					replied = true
 					return
 				} else {
 					// If we did not have a message with 8 or higher
-					sendSMS(to, messagenegative)
+					sendSMS(from, messagenegative)
 					replied = true
 					return
 				}
@@ -113,13 +113,13 @@ func handleIncomingSMS(w http.ResponseWriter, r *http.Request) {
 		}
 		// If we are unable to determine a positive or negative answer
 		// In a live environment I would recommend saving these longer responses and maybe sending it to a support desk to manually handle them
-		sendSMS(to, messagefinal)
+		sendSMS(from, messagefinal)
 		replied = true
 		done = true
 		return
 
 	} else if !done {
-		sendSMS(to, messagefinal)
+		sendSMS(from, messagefinal)
 		done = true
 		return
 	}

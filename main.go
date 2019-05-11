@@ -95,9 +95,11 @@ func handleIncomingSMS(w http.ResponseWriter, r *http.Request) {
 	if !replied && !done {
 		// If the message is less than 2 characters in length we try to convert to int
 		if len(message) <= 2 {
+			fmt.Println(message)
 			value, err := strconv.Atoi(message)
 			// If we successfully converted to an int we can process the message
 			if err != nil {
+				fmt.Println(value)
 				// I would say an 8 or higher is positive, 7 or lower would indicate something is wrong (just my assumption)
 				if value >= 8 {
 					sendSMS(from, messagepositive)
@@ -109,6 +111,8 @@ func handleIncomingSMS(w http.ResponseWriter, r *http.Request) {
 					replied = true
 					return
 				}
+			} else {
+				fmt.Println(err)
 			}
 		}
 		// If we are unable to determine a positive or negative answer
@@ -153,6 +157,6 @@ func sendSMS(to string, message string) {
 		panic(err)
 	}
 
-	fmt.Printf("Sent sms to %s: %s\n", to, message1)
+	fmt.Printf("Sent sms to %s: %s\n", to, message)
 	fmt.Println(string(body))
 }

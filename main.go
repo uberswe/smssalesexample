@@ -10,9 +10,20 @@ import (
 	"strconv"
 )
 
+var port = ":80"
+
 var numberFrom = ""
 var username = ""
 var password = ""
+
+// I use two bools since I only run this for one phone number, if you have multiple phone numbers I would change this to a map like map[phone]replied or something similar
+var replied = false
+var done = false
+
+var message1 = "Hello Markus, thank you for visiting GoPHP.io! On a scale from 1 to 10, with 10 being the best, how would you rate your experience?"
+var messagepositive = "Thank you for your feedback, we are happy you had a good experience at GoPHP.io! Please reply back to us if you would like to tell us why you liked the experience"
+var messagenegative = "We are sorry that you did not enjoy visiting GoPHP.io. If there is anything we can do to make the experience better please do not hesitate to contact us at markus@gophp.io."
+var messagefinal = "Thank you for your feedback, if you would like to get in touch with us please send an email to markus@gophp.io."
 
 func main() {
 	// We take all arguments after our program name
@@ -31,8 +42,8 @@ func main() {
 	// I recommend running this program behind something like Caddy (https://caddyserver.com/) that provides SSL and can proxy to the localhost
 	http.HandleFunc("/outgoing", handleOutgoingSMS) // setting router rule
 	http.HandleFunc("/incoming", handleIncomingSMS)
-	fmt.Println("Listening on port :8080")
-	err := http.ListenAndServe(":8080", nil) // setting listening port
+	fmt.Println("Listening on port " + port)
+	err := http.ListenAndServe(port, nil) // setting listening port
 	if err != nil {
 		panic(err)
 	}
@@ -47,38 +58,9 @@ func handleOutgoingSMS(w http.ResponseWriter, r *http.Request) {
 
 	// Direction is 'incoming'
 	to := r.FormValue("to")
-	// ID of the message
-	message := r.FormValue("message")
 
-	data := url.Values{
-		"from":    {numberFrom},
-		"to":      {to},
-		"message": {message}}
+	sendSMS(to, message1)
 
-	req, err := http.NewRequest("POST", "https://api.46elks.com/a1/SMS", bytes.NewBufferString(data.Encode()))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
-	req.SetBasicAuth(username, password)
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-
-	if err != nil {
-		panic(err)
-	}
-
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Printf("Sent sms to %s: %s\n", to, message)
-	fmt.Println(string(body))
 }
 
 func handleIncomingSMS(w http.ResponseWriter, r *http.Request) {
@@ -109,4 +91,68 @@ func handleIncomingSMS(w http.ResponseWriter, r *http.Request) {
 	message := r.FormValue("message")
 
 	fmt.Printf("[%s][%s][%s] %s => %s: %s\n", created, direction, id, from, to, message)
+
+	if !replied && !done {
+		// If the message is less than 2 characters in length we try to convert to int
+		if len(message) <= 2 {
+			value, err := strconv.Atoi(message)
+			// If we successfully converted to an int we can process the message
+			if err != nil {
+				// I would say an 8 or higher is positive, 7 or lower would indicate something is wrong (just my assumption)
+				if value >= 8 {
+					sendSMS(to, messagepositive)
+					replied = true
+					return
+				} else {
+					// If we did not have a message with 8 or higher
+					sendSMS(to, messagenegative)
+					replied = true
+					return
+				}
+			}
+		}
+		// If we are unable to determine a positive or negative answer
+		// In a live environment I would recommend saving these longer responses and maybe sending it to a support desk to manually handle them
+		sendSMS(to, messagefinal)
+		replied = true
+		done = true
+		return
+
+	} else if !done {
+		sendSMS(to, messagefinal)
+		done = true
+		return
+	}
+}
+
+func sendSMS(to string, message string) {
+	data := url.Values{
+		"from":    {numberFrom},
+		"to":      {to},
+		"message": {message}}
+
+	req, err := http.NewRequest("POST", "https://api.46elks.com/a1/SMS", bytes.NewBufferString(data.Encode()))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
+	req.SetBasicAuth(username, password)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+
+	if err != nil {
+		panic(err)
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("Sent sms to %s: %s\n", to, message1)
+	fmt.Println(string(body))
 }

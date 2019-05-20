@@ -52,6 +52,7 @@ func main() {
 	password = args[1]
 	numberFrom = args[2]
 	slackWebhook = args[3]
+	customers = make(map[string]Customer)
 
 	// This sets up two endpoints http://localhost:8080/outgoing and http://localhost:8080/incoming
 	// I recommend running this program behind something like Caddy (https://caddyserver.com/) that provides SSL and can proxy to the localhost
@@ -124,6 +125,7 @@ func handleIncomingSMS(w http.ResponseWriter, r *http.Request) {
 			customer.MessageType = msgType
 			customer.Replied = true
 			customers[from] = customer
+			updateSlack(from, message, customer.MessageType)
 			return
 		} else if msgType == Negative {
 			// If we did not have a message with 8 or higher
@@ -131,6 +133,7 @@ func handleIncomingSMS(w http.ResponseWriter, r *http.Request) {
 			customer.MessageType = msgType
 			customer.Replied = true
 			customers[from] = customer
+			updateSlack(from, message, customer.MessageType)
 			return
 		}
 		// If we are unable to determine a positive or negative answer

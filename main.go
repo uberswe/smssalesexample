@@ -24,20 +24,22 @@ type Customer struct {
 	MessageType Message
 }
 
-var port = ":80"
+var (
+	port = ":80"
 
-var numberFrom = ""
-var username = ""
-var password = ""
-var slackWebhook = ""
+	numberFrom   = ""
+	username     = ""
+	password     = ""
+	slackWebhook = ""
 
-// A map of customers so we can handle multiple phone numbers/customers
-var customers map[string]Customer
+	// A map of customers so we can handle multiple phone numbers/customers
+	customers map[string]Customer
 
-var message1 = "Hello Markus, thank you for visiting GoPHP.io! On a scale from 1 to 10, with 10 being the best, how would you rate your experience?"
-var messagepositive = "We are happy you had a good experience at GoPHP.io! Please reply back to us if you would like to tell us why you liked the experience"
-var messagenegative = "We are sorry GoPHP.io did not live up to your expectations. Please reply back to us if you would like to tell us why you were not satisfied"
-var messagefinal = "Thank you for your feedback, if you would like to get in touch with us please send an email to markus@gophp.io."
+	message1        = "Hello Markus, thank you for visiting GoPHP.io! On a scale from 1 to 10, with 10 being the best, how would you rate your experience?"
+	messagePositive = "We are happy you had a good experience at GoPHP.io! PLease reply back to use if you would like to tell us why you liked the expereince"
+	messageNegative = "We are sorry GoPHP.io did not live up to your expectations. Please reply back to us if you would like to tell us why you were not satisfied"
+	messageFinal    = "Thank you for your feedback, if you would like to get in touch with use please send an email to markus@gophp.io"
+)
 
 func main() {
 	// We take all arguments after our program name
@@ -121,7 +123,7 @@ func handleIncomingSMS(w http.ResponseWriter, r *http.Request) {
 		msgType := determineMessageType(message)
 		// I would say an 8 or higher is positive, 7 or lower would indicate something is wrong (just my assumption)
 		if msgType == Positive {
-			sendSMS(from, messagepositive)
+			sendSMS(from, messagePositive)
 			customer.MessageType = msgType
 			customer.Replied = true
 			customers[from] = customer
@@ -129,7 +131,7 @@ func handleIncomingSMS(w http.ResponseWriter, r *http.Request) {
 			return
 		} else if msgType == Negative {
 			// If we did not have a message with 8 or higher
-			sendSMS(from, messagenegative)
+			sendSMS(from, messageNegative)
 			customer.MessageType = msgType
 			customer.Replied = true
 			customers[from] = customer
@@ -138,7 +140,7 @@ func handleIncomingSMS(w http.ResponseWriter, r *http.Request) {
 		}
 		// If we are unable to determine a positive or negative answer
 		// In a live environment I would recommend saving these longer responses and maybe sending it to a support desk to manually handle them
-		sendSMS(from, messagefinal)
+		sendSMS(from, messageFinal)
 		customer.Replied = true
 		customer.Done = true
 		customers[from] = customer
@@ -146,7 +148,7 @@ func handleIncomingSMS(w http.ResponseWriter, r *http.Request) {
 		return
 
 	} else if !customer.Done {
-		sendSMS(from, messagefinal)
+		sendSMS(from, messageFinal)
 		customer.Done = true
 		customers[from] = customer
 		updateSlack(from, message, customer.MessageType)
@@ -163,7 +165,7 @@ func sendSMS(to string, message string) {
 
 	req, err := http.NewRequest("POST", "https://api.46elks.com/a1/SMS", bytes.NewBufferString(data.Encode()))
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
@@ -173,14 +175,14 @@ func sendSMS(to string, message string) {
 	resp, err := client.Do(req)
 
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 
 	fmt.Printf("Sent sms to %s: %s\n", to, message)
@@ -233,7 +235,7 @@ func updateSlack(from string, message string, t Message) {
 	// See the Slack documentation on creating webhooks https://api.slack.com/incoming-webhooks
 	req, err := http.NewRequest("POST", slackWebhook, bytes.NewBuffer(jsonStr))
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Content-Length", strconv.Itoa(len(jsonStr)))
@@ -243,14 +245,14 @@ func updateSlack(from string, message string, t Message) {
 	resp, err := client.Do(req)
 
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 
 	fmt.Printf("Sent slack message: %s - %s\n", from, message)

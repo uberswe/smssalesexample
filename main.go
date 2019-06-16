@@ -35,7 +35,7 @@ var (
 	// A map of customers so we can handle multiple phone numbers/customers
 	customers map[string]Customer
 
-	message1        = "Hello Markus, thank you for visiting GoPHP.io! On a scale from 1 to 10, with 10 being the best, how would you rate your experience?"
+	message1        = "Hello! thank you for visiting GoPHP.io! On a scale from 1 to 10, with 10 being the best, how would you rate your experience?"
 	messagePositive = "We are happy you had a good experience at GoPHP.io! PLease reply back to use if you would like to tell us why you liked the expereince"
 	messageNegative = "We are sorry GoPHP.io did not live up to your expectations. Please reply back to us if you would like to tell us why you were not satisfied"
 	messageFinal    = "Thank you for your feedback, if you would like to get in touch with use please send an email to markus@gophp.io"
@@ -166,6 +166,7 @@ func sendSMS(to string, message string) {
 	req, err := http.NewRequest("POST", "https://api.46elks.com/a1/SMS", bytes.NewBufferString(data.Encode()))
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
@@ -176,6 +177,7 @@ func sendSMS(to string, message string) {
 
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 
 	defer resp.Body.Close()
@@ -183,6 +185,7 @@ func sendSMS(to string, message string) {
 
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 
 	fmt.Printf("Sent sms to %s: %s\n", to, message)
@@ -236,6 +239,7 @@ func updateSlack(from string, message string, t Message) {
 	req, err := http.NewRequest("POST", slackWebhook, bytes.NewBuffer(jsonStr))
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Content-Length", strconv.Itoa(len(jsonStr)))
@@ -246,6 +250,7 @@ func updateSlack(from string, message string, t Message) {
 
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 
 	defer resp.Body.Close()
@@ -253,6 +258,7 @@ func updateSlack(from string, message string, t Message) {
 
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 
 	fmt.Printf("Sent slack message: %s - %s\n", from, message)

@@ -1,0 +1,110 @@
+{
+	"info": {
+		"_postman_id": "b86f873d-ad5c-4001-af06-a5b2ac8255f4",
+		"name": "SMS Sales Example",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Outgoing SMS",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "to",
+							"value": "+490000000000",
+							"type": "text"
+						},
+						{
+							"key": "message",
+							"value": "Testing, this is an sms message",
+							"type": "text",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "localhost:3000/outgoing",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"outgoing"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Incoming SMS",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "direction",
+							"value": "incoming",
+							"type": "text"
+						},
+						{
+							"key": "id",
+							"value": "sf8425555e5d8db61dda7a7b3f1b91bdb",
+							"type": "text"
+						},
+						{
+							"key": "from",
+							"value": "+46706861004",
+							"type": "text"
+						},
+						{
+							"key": "to",
+							"value": "+46706861020",
+							"type": "text"
+						},
+						{
+							"key": "created",
+							"value": "2018-07-13T13:57:23.741000",
+							"type": "text"
+						},
+						{
+							"key": "message",
+							"value": "Hello how are you",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "localhost:3000/incoming",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"incoming"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

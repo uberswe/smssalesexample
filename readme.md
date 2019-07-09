@@ -1,5 +1,7 @@
 ## SMS Sales Example
 
+This is example code for my article on this topic found here: [Customer feedback via SMS using Go and Slack](https://gophp.io/customer-feedback-via-sms-using-go-and-slack/)
+
 An example of a customer feedback bot to rate and get text input regarding past sales via text messaging written in go.
 
 Run like so: `go run main.go [46elks username] [46elks password] [Elks46 phone number] [Slack webhook]`
